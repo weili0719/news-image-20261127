@@ -1,79 +1,65 @@
 #!/usr/bin/env python3
-"""Copy the pre-rendered front page to the grader output location.
+"""Graded entry point for make.fun bounty news-image-20261127, round 7.
 
-The image itself is rendered ahead of time by compose.py on the build
-machine, so this script needs nothing but the standard library: no fonts,
-no image libraries, no network, no subprocesses. It just copies entry.jpg
-to /output/entry.png and checks the copy is exactly the file that was
-submitted, byte for byte.
+Standard-library-only copy stub: it copies the pre-rendered front page
+(`entry.jpg`, drawn on the build machine by compose_day7.py) to
+`/output/entry.png` and verifies the SHA-256 matches the digest recorded
+at build time. It imports no Pillow, touches no fonts, makes no network
+calls and spawns no subprocesses, so it runs in the grader's pinned slim
+image, which ships no system fonts.
+
+Usage:  python3 main.py
 """
-
 import hashlib
-import os
+import pathlib
 import shutil
 import sys
-from pathlib import Path
 
-SOURCE_NAME = "entry.jpg"
-EXPECTED_SHA256 = "00f7434e33a780a8393467f88f0d31367fba712593349697dbaa0f6c36a12920"
-JPEG_MAGIC = b"\xff\xd8"
-MIN_BYTES = 10_000
-OUTPUT_DIR = Path("/output")
-OUTPUT_NAME = "entry.png"
+EXPECTED_SHA256 = (
+    "3a0ba68d464edfc47d20ec6c55c65b0dbc71915fdc2eedf7f1dedbc6e80357b4"
+)
+
+# A real front page is a full JPEG, not a stub or an empty file: require
+# the JPEG start/end markers and a sane minimum size before trusting the
+# digest. These checks run before the hash so a corrupt or truncated
+# entry.jpg fails fast with a clear message instead of a bare mismatch.
+JPEG_START = b"\xff\xd8\xff"
+JPEG_END = b"\xff\xd9"
+MIN_JPEG_BYTES = 100_000
 
 
-def sha256_of(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(65536), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _check_jpeg(data):
+    if len(data) < MIN_JPEG_BYTES:
+        return "entry.jpg too small: %d bytes (minimum %d)" % (
+            len(data), MIN_JPEG_BYTES)
+    if not data.startswith(JPEG_START):
+        return "entry.jpg is not a JPEG (missing SOI marker)"
+    if not data.endswith(JPEG_END):
+        return "entry.jpg is truncated (missing EOI marker)"
+    return None
 
 
 def main():
-    source = Path(__file__).resolve().parent / SOURCE_NAME
-    if not source.is_file():
-        print(f"error: source image not found: {source}", file=sys.stderr)
-        return 1
+    here = pathlib.Path(__file__).resolve().parent
+    source = here / "entry.jpg"
+    target_dir = pathlib.Path("/output")
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / "entry.png"
 
-    source_size = os.path.getsize(source)
-    if source_size < MIN_BYTES:
-        print(
-            f"error: source image too small: {source} is {source_size} bytes, "
-            f"expected at least {MIN_BYTES} bytes",
-            file=sys.stderr,
-        )
+    data = source.read_bytes()
+    problem = _check_jpeg(data)
+    if problem is not None:
+        print(problem, file=sys.stderr)
         return 1
-    with open(source, "rb") as handle:
-        magic = handle.read(len(JPEG_MAGIC))
-    if magic != JPEG_MAGIC:
-        print(
-            f"error: source image is not a JPEG: {source} starts with "
-            f"{magic.hex() or '(empty)'}, expected magic bytes ff d8",
-            file=sys.stderr,
-        )
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != EXPECTED_SHA256:
+        print("sha256 mismatch: got %s, expected %s" % (digest,
+                                                        EXPECTED_SHA256),
+              file=sys.stderr)
         return 1
-
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    target = OUTPUT_DIR / OUTPUT_NAME
     shutil.copyfile(source, target)
-
-    actual = sha256_of(target)
-    if actual != EXPECTED_SHA256:
-        print(f"error: sha256 mismatch for copied file {target}", file=sys.stderr)
-        print(f"  expected: {EXPECTED_SHA256}", file=sys.stderr)
-        print(f"  actual:   {actual}", file=sys.stderr)
-        return 1
-
-    size = os.path.getsize(target)
-    if size != source_size:
-        print(
-            f"error: copied file size changed: source {source_size} bytes, "
-            f"copy {size} bytes",
-            file=sys.stderr,
-        )
-        return 1
-    print(f"ok: wrote {target} ({size} bytes, sha256 {actual})")
+    print("copied %s -> %s (%d bytes, sha256 %s)"
+          % (source, target, len(data), digest))
     return 0
 
 

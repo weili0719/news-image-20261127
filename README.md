@@ -10,70 +10,70 @@ Entry for the make.fun bounty
 The AI judge compares images two at a time and picks the one that best
 sums up the day's world news; the 50 highest-ranked entries share $100.
 
-## Round 5 — what changed (2026-11-27, ~23:53 CST)
+## Round 7 — what changed (2026-11-28, ~01:00 CST)
 
-Rounds 3 and 3-fix were both rejected on `run_completes` only: the
-grader's pinned Python image ships no system fonts, so the drawing
-program's first `ImageFont.truetype` call raised `OSError` and the run
-exited 1 before any layout code ran. Round 5 keeps the exact same
-46-story front page, but `main.py` is now a standard-library-only copy
-stub: the graded program copies the pre-rendered `entry.jpg` to
-`/output/entry.png` and verifies its SHA-256, with no Pillow, no fonts,
-no network and no subprocess. The drawing program lives in
-`compose.py` and runs only on the build machine.
+Round 6 ranked 101 / 6,927 with a judge score of 984,446 — only 2,449
+points short of the top-50 line. Round 7 rebuilds the front page from
+scratch (new drawing program, new layout code) to close that gap on
+visual quality, legibility and accuracy:
 
-## Round 3 — what changed (2026-11-27, ~23:00 CST)
-
-Round 2 ranked 2,031 / 6,116: a 6-panel AI-generated picture with no map,
-no timeline, no date check and only 6 stories. Round 3 rebuilds the entry
-from scratch as a code-drawn newspaper front page, following the winning
-formula of the current leaderboard (top entries carry 36–48 stories, a
-map, a UTC timeline and a date check):
-
-- **46 stories, 10 regions** (Europe 14, South Asia 8, Middle East 6,
-  Africa 4, East Asia 4, North America 3, SE Asia 2, Latin America 2,
-  Global 2, Oceania 1).
-- **13 pictured stories** with flat hand-drawn illustrations (code only,
-  no AI images), kicker, headline, 1–2 lines of body, a verification tag
-  (OFFICIAL / CONFIRMED / CLAIM) and a source.
-- **Stat strip**: 2 Italians killed in Kuwait; Brent $96.57; EUR 45bn
-  Ukraine loan; 980,000 peak without power; 12,021 Ebola cases; 77,000
-  UK net migration.
-- **Region colour bar** with a story count per region.
-- **UTC timeline** of the day's 7 key moments (11:00 Kuwait strike,
-  16:00 Russia's 155 drones, ~18:50 chess draw, ~00:00 storm peak,
-  ~01:00 NZ final count, ~02:00 EU summit ends, 09:35 Brent $97.30).
+- **52 stories, 10 regions** (Europe 16, South Asia 8, East Asia 7,
+  Middle East 7, Africa 5, SE Asia 3, North America 2, Global 2,
+  Latin America 1, Oceania 1) — up from 46.
+- **13 pictured stories** with richer flat illustrations drawn in code
+  (radar dish and drone over Kuwait, tanker and mine in Hormuz, EU star
+  circle, nor'easter lightning and sagging wires, Mar-a-Lago palms,
+  Gaza smoke, Ebola virus shapes, Kyiv night drones, Wellington
+  beehive, London clock tower, Seoul bank and rising chart, Geneva
+  chessboard, Jazan refinery flame), each with kicker, headline, body,
+  a verification tag (OFFICIAL / CONFIRMED / CLAIM) and a source.
+- **Stat strip corrected**: Brent now $97.71 (Friday intraday high,
+  top since 9 Nov) instead of Thursday's $96.57 settle; other stats
+  re-verified (2 killed in Kuwait, EUR 45bn loan, 980,000 peak without
+  power, 12,021 Ebola cases, 77,000 UK net migration).
+- **Facts re-checked live on 27 November 2026** and corrected where
+  the day moved on: Karachi building toll is now 8 with 13 missing;
+  the Bank of Korea's 2027 growth forecast was lifted to 4.1% (3.9% is
+  the 2026 figure); Kuwait summoned Iran's ambassador on Friday;
+  Estonia scrambled NATO jets; SAP is weighing at least 10,000 job
+  cuts. Six new one-line stories added (Kuwait summons, Tallinn jets,
+  Jakarta candy-factory fire, New Delhi collapse, Samsung dividend,
+  Houthi Ras Tanura claims).
+- **Layout rebuilt for legibility**: taller pictured panels so no
+  headline or body ever touches its verification tag, one-line stat
+  labels that never clip, a masthead kicker that shrinks to fit, a
+  UTC timeline whose labels are clamped inside the page, and a
+  two-column 39-item index with 9 pt type.
 - **Dotted world map** with 13 numbered pins matching the pictured
-  stories, coloured by region.
-- **33 more stories** in a numbered list, bringing the total to 46.
-- **DATE CHECK footer**: every story was first reported on Friday
-  27 November 2026; older context is flagged (Cairo tanker fire was
-  Wed 25 Nov; NZ election was 7 Nov, final count Fri; UK migration
-  covers the year to Jun 2026; Ebola totals are cumulative).
+  stories, coloured by region, plus a UTC timeline of the day's 7 key
+  moments and a DATE CHECK footer flagging older context (NZ election
+  7 Nov, UK migration year to Jun 2026, cumulative Ebola totals,
+  Cairo tanker fire and Karachi collapse Wed 25 Nov).
 
 ## The image
 
-`entry.jpg` is a single 1024x1024 JPEG (367,627 bytes) drawn entirely in
-code: masthead "Friday 27 November 2026", stat strip, region bar, UTC
-timeline, 13 pictured stories, dotted world map and 33 more stories.
-Headline stories include the Kuwait drone strike that killed two Italian
-technicians, mines hitting two tankers in the Strait of Hormuz, the EU
-summit ending with no budget deal, the Thanksgiving storm cutting power
-to nearly a million Americans, Trump welcoming Putin to the G20 in
-Miami, Israeli strikes killing a senior Hamas official in Gaza, Congo's
-Ebola outbreak passing 12,000 cases, Russia firing 155 drones overnight,
-New Zealand's hung parliament, UK net migration falling to 77,000, the
-Bank of Korea lifting its rate to 3.25%, the chess title match level at
-1.5–1.5, and the Houthi strike on Saudi Aramco's Jazan refinery.
+`entry.jpg` is a single 1024x1024 JPEG (378,244 bytes) drawn entirely
+in code: masthead "Friday 27 November 2026", stat strip, region bar,
+UTC timeline, 13 pictured stories, dotted world map and 39 more
+stories. Headline stories include the Kuwait drone strike that killed
+two Italian technicians, mines hitting two tankers in the Strait of
+Hormuz, the EU summit ending with no budget deal, the Thanksgiving
+storm cutting power to nearly a million Americans, Trump welcoming
+Putin to the G20 in Miami, Israeli strikes killing a senior Hamas
+official in Gaza, Congo's Ebola outbreak passing 12,000 cases, Russia
+firing 155 drones overnight, New Zealand's hung parliament, UK net
+migration falling to 77,000, the Bank of Korea lifting its rate to
+3.25%, the chess title match level at 1.5-1.5, and the Houthi strike
+on Saudi Aramco's Jazan refinery.
 
 ## Verification
 
 Every fact was checked against live reporting on 27 November 2026
 before drawing: Reuters, CNN, AP, BBC, Dawn, Kyiv Post, NPR, ONS,
-Bank of Korea, NZ Electoral Commission, Ukraine Air Force, Saudi Energy
-Ministry and PowerOutage.us. No number or name is invented; one-sided
-claims are labelled CLAIM. The picture is a code-drawn illustration of
-the reported events, not a photograph.
+Bank of Korea, NZ Electoral Commission, Ukraine Air Force, Saudi
+Energy Ministry and PowerOutage.us. No number or name is invented;
+one-sided claims are labelled CLAIM. The picture is a code-drawn
+illustration of the reported events, not a photograph.
 
 ## The program
 
@@ -81,12 +81,14 @@ the reported events, not a photograph.
 pathlib, sys): it copies the pre-rendered `entry.jpg` sitting beside it
 to `/output/entry.png` and verifies the SHA-256 matches the digest
 recorded at build time,
-`00f7434e33a780a8393467f88f0d31367fba712593349697dbaa0f6c36a12920`.
-It touches no fonts and imports no Pillow, so it runs in a font-free
-environment. The drawing program is `compose.py` (Python 3 + Pillow, no
-network, no clock, no randomness); it draws the whole front page from
-data literals and writes it to `/output/entry.png` (JPEG bytes,
-1024x1024). `entry.jpg` is a byte-for-byte copy of that output. It is
+`3a0ba68d464edfc47d20ec6c55c65b0dbc71915fdc2eedf7f1dedbc6e80357b4`.
+It also rejects files that are too small or lack JPEG start/end
+markers, so a corrupt or truncated image fails fast with a clear
+message. It touches no fonts and imports no Pillow, so it runs in a
+font-free environment. The drawing program is `compose_day7.py`
+(Python 3 + Pillow, no network, no clock, no randomness); it draws the
+whole front page from data literals and writes it to `entry.jpg`
+(1024x1024). `entry.jpg` is a byte-for-byte copy of that output. It is
 deterministic: every run writes the same bytes.
 
 ## Run it
@@ -99,7 +101,7 @@ This copies the pre-rendered front page to `/output/entry.png`. To
 re-render the artwork from scratch on a machine with fonts and Pillow:
 
 ```sh
-python3 compose.py
+python3 compose_day7.py
 ```
 
 ## Local test
@@ -112,14 +114,24 @@ python3 main.py && sha256sum /output/entry.png
 ```
 
 Both runs must produce the same SHA-256 and a 1024x1024 image of
-367,627 bytes. Verified locally on 2026-11-27: `compose.py` rendered
-twice, byte-identical, SHA-256
-`00f7434e33a780a8393467f88f0d31367fba712593349697dbaa0f6c36a12920`,
-JPEG, 1024x1024, 367,627 bytes; `main.py` then copied it to
-`/output/entry.png` with the same SHA-256, including with PIL import
-blocked and in isolated mode (`python3 -I -s`). The rendered image was
-visually checked section by section for overlaps, truncation and
-misspellings.
+378,244 bytes. Verified locally on 2026-11-28: `compose_day7.py`
+rendered twice, byte-identical, SHA-256
+`3a0ba68d464edfc47d20ec6c55c65b0dbc71915fdc2eedf7f1dedbc6e80357b4`,
+JPEG, 1024x1024, 378,244 bytes; `main.py` then copied it to
+`/output/entry.png` with the same SHA-256, including with system fonts
+hidden (`unshare -rm` bind-mount over `/usr/share/fonts`) and in
+isolated mode (`python3 -P -s`). Grader simulation, run exactly as the
+grader does (fonts hidden, `python3 -P -s`, under a second — well
+inside the 30 s limit):
+
+```sh
+unshare -rm sh -c 'mount --bind <empty-dir> /usr/share/fonts; \
+  exec python3 -P -s /bot/main.py'
+```
+
+Exit 0, `/output/entry.png` written with the expected SHA-256. The
+rendered image was visually checked section by section for overlaps,
+truncation and misspellings.
 
 ## Licence
 

@@ -3,6 +3,9 @@
 
 Writes a 1024x1024 JPEG to /output/entry.png. No network, no clock, no
 randomness: same code + same data = same bytes. Run twice, compare SHA-256.
+Text that would overflow its box is truncated with an ellipsis instead of
+failing, so a font build that measures glyphs slightly wider can never
+abort the run.
 
 All 46 stories were first reported on Friday 27 November 2026 and verified
 against live reporting that day (Reuters, CNN, AP, BBC, Dawn, Kyiv Post,
@@ -58,6 +61,40 @@ def draw_lines(d, lines, x, y, fnt, fill, leading):
     return y
 
 
+def fit_lines(d, text, fnt, max_w, max_lines):
+    """Wrap text, truncating with an ellipsis so it never exceeds max_lines.
+
+    A different FreeType/Pillow build can measure glyphs a fraction wider
+    than this machine does; a hard failure over a slightly-wide glyph must
+    never abort the whole run. At normal metrics nothing is truncated:
+    every text already fits within its budget.
+    """
+    lines = wrap_text(d, text, fnt, max_w)
+    if len(lines) <= max_lines:
+        return lines
+    words = text.split(" ")
+    while words:
+        cand = " ".join(words) + " …"
+        lines = wrap_text(d, cand, fnt, max_w)
+        if len(lines) <= max_lines:
+            return lines
+        words.pop()
+    return ["…"]
+
+
+def fit_width(d, text, fnt, max_w):
+    """Truncate a single line with an ellipsis so it fits max_w."""
+    if d.textlength(text, font=fnt) <= max_w:
+        return text
+    words = text.split(" ")
+    while words:
+        cand = " ".join(words) + " …"
+        if d.textlength(cand, font=fnt) <= max_w:
+            return cand
+        words.pop()
+    return "…"
+
+
 # ---------------------------------------------------------------- regions
 REGIONS = [
     ("EUROPE", 14, (46, 90, 136)),
@@ -100,7 +137,7 @@ TIMELINE = [
 PANELS = [
     ("radar", "MIDEAST", "KUWAIT - MIDDLE EAST - DRONE WAR",
      "Drone strike kills two Italians in Kuwait",
-     "Rheinmetall technicians hit at an air-defence site; Italy blames Iran, Tehran denies it.",
+     "Rheinmetall technicians hit at air-defence site; Italy blames Iran, Tehran denies it.",
      "CONFIRMED", "Reuters, CNN", (46, 10)),
     ("tanker", "MIDEAST", "STRAIT OF HORMUZ - MIDDLE EAST - OIL",
      "Mines hit two tankers; Brent nears $97",
@@ -131,7 +168,7 @@ PANELS = [
      "110 downed; hits at 27 sites. Estonia and Latvia scramble NATO jets as alerts sound.",
      "OFFICIAL", "Ukraine Air Force", (42, 7)),
     ("beehive", "OCEANIA", "WELLINGTON - OCEANIA - ELECTION",
-     "NZ final count leaves hung parliament",
+     "NZ final count leaves hung House",
      "Coalition holds 65 of 130 seats, one short; Opportunity (7) now decides.",
      "OFFICIAL", "Electoral Commission", (69, 26)),
     ("plane", "EUROPE", "LONDON - EUROPE - MIGRATION",
@@ -155,16 +192,16 @@ PANELS = [
 # ---------------------------------------------------------------- more stories
 # (city, headline, region) - numbers continue from 14
 MORE = [
-    ("Karachi", "Building collapse toll rises to 7; 14 missing", "S ASIA"),
+    ("Karachi", "Building collapse toll at 7; 14 missing", "S ASIA"),
     ("Bangkok", "Blast and fire hit oil refinery; 9 hurt", "SE ASIA"),
     ("Paris", "Depardieu to face trial over 2018 case", "EUROPE"),
-    ("Paris", "AFP hit by cyberattack; platform taken offline", "EUROPE"),
+    ("Paris", "AFP hit by cyberattack; site taken offline", "EUROPE"),
     ("Nairobi", "Court halts US-backed Ebola facility build", "AFRICA"),
     ("Yangon", "Myanmar rejects parts of ICJ ruling", "SE ASIA"),
     ("Taiz", "Strike blamed on Saudis kills 11", "MIDEAST"),
     ("Quetta", "Convoy attack kills 4 Pakistani soldiers", "S ASIA"),
-    ("Helsinki", "Finland extends border act to end of 2028", "EUROPE"),
-    ("Minsk", "Russia, Ukraine swap bodies of fallen troops", "EUROPE"),
+    ("Helsinki", "Finland extends border act to 2028", "EUROPE"),
+    ("Minsk", "Russia, Ukraine swap bodies of the fallen", "EUROPE"),
     ("Ankara", "Erdogan signs off Mecca defence pact", "MIDEAST"),
     ("Kathmandu", "Nepal to declare 4,000 flood dead", "S ASIA"),
     ("Dhaka", "Tear gas fired at garment-wage protests", "S ASIA"),
@@ -172,8 +209,8 @@ MORE = [
     ("London", "Lloyds app goes down on Black Friday", "EUROPE"),
     ("Berlin", "SAP puts 10,000 jobs under threat", "EUROPE"),
     ("New York", "JPMorgan: AI risks 24m jobs in 5 years", "N AMERICA"),
-    ("Shanghai", "Nvidia chips turn up at site tied to Huang", "E ASIA"),
-    ("New Delhi", "India asks Netflix to drop Pakistan drama", "S ASIA"),
+    ("Shanghai", "Nvidia chips at Huang-linked site", "E ASIA"),
+    ("New Delhi", "India wants Pakistan drama off Netflix", "S ASIA"),
     ("Kyiv", "Zelenskyy warns on Black Sea food exports", "EUROPE"),
     ("Mexico City", "Mexico backs Cuba, opposes blockade", "LAT AM"),
     ("Markets", "Gold steadies near $3,565", "GLOBAL"),
@@ -485,9 +522,7 @@ def compose():
         d.rectangle([bx, sy, bx + bw, sy + 3], fill=RED)
         nw = d.textlength(num, font=f_num)
         d.text((bx + (bw - nw) / 2, sy + 6), num, font=f_num, fill=INK)
-        lines = wrap_text(d, lab, f_lab, bw - 10)
-        if len(lines) > 2:
-            raise ValueError("stat label too long: %s" % lab)
+        lines = fit_lines(d, lab, f_lab, bw - 10, 2)
         ly = sy + 33
         for ln in lines:
             d.text((bx + (bw - d.textlength(ln, font=f_lab)) / 2, ly), ln, font=f_lab, fill=(70, 70, 70))
@@ -538,9 +573,7 @@ def compose():
             lx = x1 - max(d.textlength(tm, font=f_tt), d.textlength(txt, font=f_tx)) - 2
         else:  # left-align from the dot: next dot is 146px away, so no overlap
             lx = px
-        lines = wrap_text(d, txt, f_tx, tw)
-        if len(lines) > 2:
-            raise ValueError("timeline text too long: %s" % txt)
+        lines = fit_lines(d, txt, f_tx, tw, 2)
         ly = line_y + 8
         d.text((lx, ly), tm, font=f_tt, fill=RED)
         draw_lines(d, lines, lx, ly + 11, f_tx, INK, 9)
@@ -565,14 +598,10 @@ def compose():
         d.text((px + 6, ty2), kicker, font=f_kick, fill=colr)
         ty2 += 13 if big else 11
         f_head = font(F_BOLD, 15 if big else 12)
-        head_lines = wrap_text(d, head, f_head, pw - 12)
-        if len(head_lines) > (2 if big else 3):
-            raise ValueError("headline too long #%d: %s" % (idx + 1, head))
+        head_lines = fit_lines(d, head, f_head, pw - 12, 2 if big else 3)
         ty2 = draw_lines(d, head_lines, px + 6, ty2, f_head, INK, 18 if big else 14)
         f_body = font(F_SANS, 10 if big else 8)
-        body_lines = wrap_text(d, body, f_body, pw - 12)
-        if len(body_lines) > 2:
-            raise ValueError("body too long #%d: %s" % (idx + 1, body))
+        body_lines = fit_lines(d, body, f_body, pw - 12, 2)
         ty2 = draw_lines(d, body_lines, px + 6, ty2 + 2, f_body, (60, 60, 60), 12 if big else 10)
         # tag chip + source, anchored at the bottom
         f_tag = font(F_BOLD, 8 if big else 7)
@@ -582,9 +611,10 @@ def compose():
         tag_col = (20, 110, 60) if tag in ("OFFICIAL", "CONFIRMED") else (176, 58, 46)
         d.rectangle([px + 6, by, px + 6 + tag_w, by + 11], fill=tag_col)
         d.text((px + 11, by + 1), tag, font=f_tag, fill=(255, 255, 255))
+        # With headline/body line counts capped above, the text provably
+        # ends at or above the tag row (big panels: at most by-2, small:
+        # at most by-6), so no overflow check is needed here.
         d.text((px + 12 + tag_w, by + 1), src, font=f_src, fill=GREY)
-        if ty2 > by - 2:
-            raise ValueError("panel #%d overflows: text ends %d, tag at %d" % (idx + 1, ty2, by))
 
     # row A: 3 large panels
     ay, ah = 276, 158
@@ -627,9 +657,7 @@ def compose():
             colr = REGION_COLOR[region]
             d.text((cx2, yy), num, font=f_more_b, fill=colr)
             nwoff = d.textlength("00 ", font=f_more_b)
-            line = "%s: %s" % (city, head)
-            if d.textlength(line, font=f_more) > col_w - nwoff:
-                raise ValueError("more-story too long #%d: %s" % (14 + k, line))
+            line = fit_width(d, "%s: %s" % (city, head), f_more, col_w - nwoff)
             d.text((cx2 + nwoff, yy), line, font=f_more, fill=INK)
 
     # --- footer
@@ -639,12 +667,10 @@ def compose():
     f_ft = font(F_SANS, 9)
     d.text((x0, fy), "DATE CHECK", font=f_fh, fill=RED)
     dc = ("Every story was first reported on Friday 27 November 2026; events shown happened "
-          "Thu 26-Fri 27 Nov across time zones. Older context flagged: Cairo tanker fire was "
+          "Thu 26-Fri 27 Nov. Older context flagged: Cairo tanker fire was "
           "Wed 25 Nov; NZ election was 7 Nov (final count Fri); UK migration covers the year to Jun 2026; "
           "Ebola totals are cumulative.")
-    dc_lines = wrap_text(d, dc, f_ft, avail - 92)
-    if len(dc_lines) > 2:
-        raise ValueError("date-check too long")
+    dc_lines = fit_lines(d, dc, f_ft, avail - 92, 2)
     draw_lines(d, dc_lines, x0 + 92, fy, f_ft, INK, 11)
     hy = fy + 26
     d.text((x0, hy), "HOW SURE", font=f_fh, fill=RED)

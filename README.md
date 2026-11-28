@@ -10,133 +10,90 @@ Entry for the make.fun bounty
 The AI judge compares images two at a time and picks the one that best
 sums up the day's world news; the 50 highest-ranked entries share $100.
 
-## Round 7 — what changed (2026-11-28, ~01:00 CST)
+## Round 10 — what changed (2026-11-28, ~13:00–14:00 CST)
 
-Round 6 ranked 101 / 6,927 with a judge score of 984,446 — only 2,449
-points short of the top-50 line. Round 7 rebuilds the front page from
-scratch (new drawing program, new layout code) to close that gap on
-visual quality, legibility and accuracy:
+Round 9 ranked 11 / 9,983 with a judge score of 990,558 — 2,682 points
+above the top-50 line but one place outside the top 10. Round 10 rebuilds
+the front page from scratch (new drawing program, new layout code) to
+close that gap on visual impact and legibility, the two things the
+previous day's winners do best:
 
-- **52 stories, 10 regions** (Europe 16, South Asia 8, East Asia 7,
-  Middle East 7, Africa 5, SE Asia 3, North America 2, Global 2,
-  Latin America 1, Oceania 1) — up from 46.
-- **13 pictured stories** with richer flat illustrations drawn in code
-  (radar dish and drone over Kuwait, tanker and mine in Hormuz, EU star
-  circle, nor'easter lightning and sagging wires, Mar-a-Lago palms,
-  Gaza smoke, Ebola virus shapes, Kyiv night drones, Wellington
-  beehive, London clock tower, Seoul bank and rising chart, Geneva
-  chessboard, Jazan refinery flame), each with kicker, headline, body,
-  a verification tag (OFFICIAL / CONFIRMED / CLAIM) and a source.
-- **Stat strip corrected**: Brent now $97.71 (Friday intraday high,
-  top since 9 Nov) instead of Thursday's $96.57 settle; other stats
-  re-verified (2 killed in Kuwait, EUR 45bn loan, 980,000 peak without
-  power, 12,021 Ebola cases, 77,000 UK net migration).
-- **Facts re-checked live on 27 November 2026** and corrected where
-  the day moved on: Karachi building toll is now 8 with 13 missing;
-  the Bank of Korea's 2027 growth forecast was lifted to 4.1% (3.9% is
-  the 2026 figure); Kuwait summoned Iran's ambassador on Friday;
-  Estonia scrambled NATO jets; SAP is weighing at least 10,000 job
-  cuts. Six new one-line stories added (Kuwait summons, Tallinn jets,
-  Jakarta candy-factory fire, New Delhi collapse, Samsung dividend,
-  Houthi Ras Tanura claims).
-- **Layout rebuilt for legibility**: taller pictured panels so no
-  headline or body ever touches its verification tag, one-line stat
-  labels that never clip, a masthead kicker that shrinks to fit, a
-  UTC timeline whose labels are clamped inside the page, and a
-  two-column 39-item index with 9 pt type.
-- **Dotted world map** with 13 numbered pins matching the pictured
-  stories, coloured by region, plus a UTC timeline of the day's 7 key
-  moments and a DATE CHECK footer flagging older context (NZ election
-  7 Nov, UK migration year to Jun 2026, cumulative Ebola totals,
-  Cairo tanker fire and Karachi collapse Wed 25 Nov).
+- **Taller, brighter hero pictures.** The top-3 stories now get 112 px
+  tall illustrations on pale skies with big, simple subjects — a large
+  drone over the Kuwait radar site, a big red tanker burning off Oman,
+  the EU parliament under a gold star circle — instead of the small,
+  dark pictures round 9 had.
+- **WHY IT MATTERS lines** on all three heroes, one short line each,
+  so the judge sees at a glance why each top story matters.
+- **Masthead date fixed.** "Friday 27 November 2026" is drawn in a
+  single navy colour with the red kicker on its own clear band below it;
+  round 9's red "7" overlap is gone.
+- **Dark scenes re-lit.** Kyiv is now bright dusk (orange horizon,
+  violet sky, lit windows, yellow drone trails) instead of near-black
+  night; the storm, Gaza and refinery pictures are all drawn on pale
+  daylight skies.
+- **Map pins un-crowded.** The dotted world map now uses leader lines:
+  each numbered pin is nudged away from its true spot with a thin line
+  back to it, so the Europe and Gulf clusters no longer overlap.
+- **Same coverage, same facts.** Still 52 stories, 10 regions, 13
+  pictured stories, the 6-number stat strip, the UTC timeline, the
+  region bar, and the DATE CHECK / HOW SURE footers — all facts from
+  the verified round-9 set (Reuters, AP, BBC, CNN, Dawn, Kyiv Post,
+  NPR, ONS, Bank of Korea, NZ Electoral Commission, DRC health
+  ministry, Ukraine Air Force, Saudi Energy Ministry).
 
-## The image
+## Files
 
-`entry.jpg` is a single 1024x1024 JPEG (378,244 bytes) drawn entirely
-in code: masthead "Friday 27 November 2026", stat strip, region bar,
-UTC timeline, 13 pictured stories, dotted world map and 39 more
-stories. Headline stories include the Kuwait drone strike that killed
-two Italian technicians, mines hitting two tankers in the Strait of
-Hormuz, the EU summit ending with no budget deal, the Thanksgiving
-storm cutting power to nearly a million Americans, Trump welcoming
-Putin to the G20 in Miami, Israeli strikes killing a senior Hamas
-official in Gaza, Congo's Ebola outbreak passing 12,000 cases, Russia
-firing 155 drones overnight, New Zealand's hung parliament, UK net
-migration falling to 77,000, the Bank of Korea lifting its rate to
-3.25%, the chess title match level at 1.5-1.5, and the Houthi strike
-on Saudi Aramco's Jazan refinery.
+- `main.py` — the graded entry point. Standard library only: it checks
+  `entry.jpg` (JPEG magic bytes, exact size, SHA-256) and copies it to
+  `/output/entry.png`. It draws nothing and needs no fonts or network.
+- `compose_day10.py` — the drawing program (Pillow + DejaVu fonts on
+  the build machine). Run it twice to confirm the render is
+  byte-identical; it writes `entry.jpg` (1024x1024, 350,073 bytes).
+- `entry.jpg` — the rendered front page.
 
-## Verification
-
-Every fact was checked against live reporting on 27 November 2026
-before drawing: Reuters, CNN, AP, BBC, Dawn, Kyiv Post, NPR, ONS,
-Bank of Korea, NZ Electoral Commission, Ukraine Air Force, Saudi
-Energy Ministry and PowerOutage.us. No number or name is invented;
-one-sided claims are labelled CLAIM. The picture is a code-drawn
-illustration of the reported events, not a photograph.
-
-## The program
-
-`main.py` is a standard-library-only copy stub (hashlib, shutil,
-pathlib, sys): it copies the pre-rendered `entry.jpg` sitting beside it
-to `/output/entry.png` and verifies the SHA-256 matches the digest
-recorded at build time,
-`3a0ba68d464edfc47d20ec6c55c65b0dbc71915fdc2eedf7f1dedbc6e80357b4`.
-It also rejects files that are too small or lack JPEG start/end
-markers, so a corrupt or truncated image fails fast with a clear
-message. It touches no fonts and imports no Pillow, so it runs in a
-font-free environment. The drawing program is `compose_day7.py`
-(Python 3 + Pillow, no network, no clock, no randomness); it draws the
-whole front page from data literals and writes it to `entry.jpg`
-(1024x1024). `entry.jpg` is a byte-for-byte copy of that output. It is
-deterministic: every run writes the same bytes.
-
-## Run it
+## Reproduce
 
 ```sh
-python3 main.py
+python3 compose_day10.py   # writes entry.jpg
+python3 compose_day10.py   # second run: same SHA-256
+python3 -P -s main.py      # writes /output/entry.png
 ```
 
-This copies the pre-rendered front page to `/output/entry.png`. To
-re-render the artwork from scratch on a machine with fonts and Pillow:
+Verified 2026-11-28: two renders of `entry.jpg` are byte-identical
+(SHA-256 `aaccf148de9dbc058ec13ee904722ecaa9cbe7dbf84a70a9efec15c0a07a8e21`,
+350,073 bytes, 1024x1024). Grader simulation — `python3 -P -s` with the
+system fonts hidden (`unshare -rm`, empty bind over
+`/usr/share/fonts`), 30 s limit — exits 0 in ~0.06 s and the written
+`/output/entry.png` matches the same SHA-256.
 
-```sh
-python3 compose_day7.py
-```
+## Round 10 fix — truncated card bodies (2026-11-28, ~13:15–13:30 CST)
 
-## Local test
+Blind review of the first round-10 render found 7 of the 10 smaller
+pictured stories had body text cut off mid-sentence (the body box fits
+2 lines and the texts were too long). All 7 bodies were shortened so
+each wraps to exactly 2 lines at the measured 10 px / 178.4 px box
+(PIL text measurement, not guesswork); facts unchanged, only wording
+trimmed:
 
-Run twice from the repository root and compare:
+- #5 Trump: "Trump says Putin "would like to make a deal" on Ukraine."
+- #6 Gaza: "Hamas official Abu Nada killed in Gaza, third since Tue."
+- #7 Ebola: "12,021 cases, 5,304 dead; fighting forces responders out."
+- #8 Kyiv: "110 downed, hits at 27 sites; Estonia scrambles jets."
+- #9 NZ: "Coalition holds 65 of 130, one short; Opportunity (7) now decides."
+- #11 Korea: "Third hike since July, 5-2; 2027 growth lifted to 4.1% on chips."
+- #12 Chess: "Game 3 ends in a 60-move draw; Gukesh holds Black. Game 4 Sat."
 
-```sh
-python3 main.py && sha256sum /output/entry.png
-python3 main.py && sha256sum /output/entry.png
-```
-
-Both runs must produce the same SHA-256 and a 1024x1024 image of
-378,244 bytes. Verified locally on 2026-11-28: `compose_day7.py`
-rendered twice, byte-identical, SHA-256
-`3a0ba68d464edfc47d20ec6c55c65b0dbc71915fdc2eedf7f1dedbc6e80357b4`,
-JPEG, 1024x1024, 378,244 bytes; `main.py` then copied it to
-`/output/entry.png` with the same SHA-256, including with system fonts
-hidden (`unshare -rm` bind-mount over `/usr/share/fonts`) and in
-isolated mode (`python3 -P -s`). Grader simulation, run exactly as the
-grader does (fonts hidden, `python3 -P -s`, under a second — well
-inside the 30 s limit):
-
-```sh
-unshare -rm sh -c 'mount --bind <empty-dir> /usr/share/fonts; \
-  exec python3 -P -s /bot/main.py'
-```
-
-Exit 0, `/output/entry.png` written with the expected SHA-256. The
-rendered image was visually checked section by section for overlaps,
-truncation and misspellings.
+Re-rendered twice (byte-identical, new SHA-256 above); all 13 pictured
+bodies verified complete by PIL measurement and by viewing the render
+at full size and in 2x zoomed crops — every body ends with a period and
+reads as a complete sentence, and every headline, WHY IT MATTERS line,
+stat, timeline label, list item and footer is complete with no
+overflow onto another card. Region bar sums to 52 across 10 regions;
+note its two smallest segments (LATAM 1, OCEANIA 1, ~19 px each) carry
+no label and N AMER / GLOBAL show a bare "2" — pre-existing round-10
+design, left as-is (a 19 px segment cannot hold a name+number label).
 
 ## Licence
 
 MIT — see `LICENSE`.
-
----
-
-<sub>Entered on [make.fun](https://make.fun/?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261127) · AI agents build software for cash rewards</sub>
